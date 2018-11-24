@@ -1,0 +1,281 @@
+#define ML_IN1 2   // For Motor 1 direction
+#define ML_IN2 4   // For Motor 1 direction
+#define ML_EN 3    // For Motor 1 speed 
+#define MR_IN3 7   // For Motor 2 direction
+#define MR_IN4 8   // For Motor 2 direction
+#define MR_EN 6    // For Motor 2 speed
+
+#define MOTOR_LEFT 1
+#define MOTOR_RIGHT 2
+#define OMEGA_LIMIT 20
+#define VEL_LIMIT 235
+#define CONTROL_FREQ 20
+
+const int TrigPin_F = 13; // Trigger Pin of Ultrasonic Sensor
+const int EchoPin_F = 12; // Echo Pin of Ultrasonic Sensor
+const int TrigPin_R1 = 11; // Trigger pin of second ultra sonic sensor
+const int EchoPin_R1 = 10;
+const int TrigPin_R2 = 9; // Trigger pin of second ultra sonic sensor
+const int EchoPin_R2 = 5;
+
+long duration_F, inches_F, cm_F;
+long duration_R1, inches_R1, cm_R1;
+long duration_R2, inches_R2, cm_R2;
+
+//Filtering variables for front sensor
+float var_F = 0.245431364;  // variance determined using excel and reading samples of raw sensor data
+float varProcess_F = 1e2;
+float Pc_F = 0.0;
+float G_F = 0.0;
+float P_F = 1.0;
+float Xp_F = 0.0;
+float Zp_F = 0.0;
+float Xe_F = 0.0;
+
+//Filtering variables for left sensor
+float var_R1 = 0.245431364;  // variance determined using excel and reading samples of raw sensor data
+float varProcess_R1 = 1e2;
+float Pc_R1 = 0.0;
+float G_R1 = 0.0;
+float P_R1 = 1.0;
+float Xp_R1 = 0.0;
+float Zp_R1 = 0.0;
+float Xe_R1 = 0.0;
+
+//Filtering variables for right sensor
+float var_R2 = 0.245431364;  // variance determined using excel and reading samples of raw sensor data
+float varProcess_R2 = 1e2;
+float Pc_R2 = 0.0;
+float G_R2 = 0.0;
+float P_R2 = 1.0;
+float Xp_R2 = 0.0;
+float Zp_R2 = 0.0;
+float Xe_R2 = 0.0;
+
+void set_motor_speed(int motor, int speed) {
+
+  int vel_cmd = constrain(abs(speed), 0, 255);
+  if (motor == MOTOR_LEFT) {
+    if (speed > 0) {
+      // Turn the motor in one direction
+      digitalWrite(ML_IN1, LOW);
+      digitalWrite(ML_IN2, HIGH);
+      analogWrite(ML_EN, vel_cmd);
+      Serial.println("vel_left > 0");
+    }
+    else if (speed < 0) {
+      // Turn the motor in another direction
+      digitalWrite(ML_IN1, HIGH);
+      digitalWrite(ML_IN2, LOW);
+      analogWrite(ML_EN, vel_cmd);
+      Serial.println("vel_left < 0");
+    }
+    else
+    {
+      // Stop the motor
+      digitalWrite(ML_IN1, LOW);
+      digitalWrite(ML_IN2, LOW);
+      analogWrite(ML_EN, 0);
+      Serial.println("vel_left = 0");
+
+    }
+  }
+  else if (motor == MOTOR_RIGHT) {
+    if (speed > 0) {
+      // Turn the motor in one direction
+      digitalWrite(MR_IN3, HIGH);
+      digitalWrite(MR_IN4, LOW);
+      analogWrite(MR_EN, vel_cmd);
+      Serial.println("vel_right > 0");
+    }
+    else if (speed < 0) {
+      // Turn the motor in another direction
+      digitalWrite(MR_IN3, LOW);
+      digitalWrite(MR_IN4, HIGH);
+      analogWrite(MR_EN,  vel_cmd);
+      Serial.println("vel_right < 0");
+    }
+    else
+    {
+      // Stop the motor
+      digitalWrite(MR_IN3, LOW);
+      digitalWrite(MR_IN4, LOW);
+      analogWrite(MR_EN, 0);
+      Serial.println("vel_right = 0");
+
+    }
+  }
+}
+
+void set_boat_move(int vel, int omega) {
+  // This function is called to set the
+  // linear and angular velocity of the
+  // boat. You can find the nutural position
+  // of your boat by tuning the v and omega.
+
+  // Linear and anglular velocity
+  int v = constrain(vel, -VEL_LIMIT, VEL_LIMIT);
+  int w = constrain(omega, -OMEGA_LIMIT, OMEGA_LIMIT);
+  // Motor velocity command for both motors
+  int vel_L = constrain(v + w, -255, 255);
+  int vel_R = constrain(v - w, -255, 255);
+  // Set speed for both motors
+  set_motor_speed(MOTOR_LEFT, vel_L);
+  set_motor_speed(MOTOR_RIGHT, vel_R);
+
+}
+
+void setup() {
+  // Setup serial port
+  Serial.begin(9600);
+
+  pinMode(ML_IN1, OUTPUT);
+  pinMode(ML_IN2, OUTPUT);
+  pinMode(ML_EN, OUTPUT);
+  pinMode(MR_IN3, OUTPUT);
+  pinMode(MR_IN4, OUTPUT);
+  pinMode(MR_EN, OUTPUT);
+
+  pinMode(TrigPin_F, OUTPUT);
+  pinMode(EchoPin_F, INPUT);
+  pinMode(TrigPin_R1, OUTPUT);
+  pinMode(EchoPin_R1, INPUT);
+  pinMode(TrigPin_R2, OUTPUT);
+  pinMode(EchoPin_R2, INPUT);
+
+  // Set both motor speed as zero
+  set_motor_speed(MOTOR_LEFT, 0);
+  set_motor_speed(MOTOR_RIGHT, 0);
+
+  // Wait for 7 second, let the system become stable
+  delay(5000);
+  ultrasonic_F();
+  ultrasonic_R1();
+  ultrasonic_R2();
+}
+
+void loop() {
+
+  //All free condition, turn right
+  while (Xe_F > 30 && Xe_R1 > 40)
+  {
+    set_motor_speed(MOTOR_LEFT, 200);
+    set_motor_speed(MOTOR_RIGHT, 200);
+    delay(2000);
+    Serial.println("+++++");
+    ultrasonic_F();
+    ultrasonic_R1();
+    ultrasonic_R2();
+    //break;
+  }
+
+  //Too close to border, turn left
+  while (Xe_R1 <= 30)
+  {
+    set_motor_speed(MOTOR_LEFT, -200);
+    set_motor_speed(MOTOR_RIGHT, -200);
+    delay(2000);
+    Serial.println("+++++");
+    ultrasonic_F();
+    ultrasonic_R1();
+    ultrasonic_R2();
+    //break;
+  }
+  //Front Block sensed, turn left
+  while (Xe_F <= 30)
+  {
+    set_motor_speed(MOTOR_LEFT, 0);
+    set_motor_speed(MOTOR_RIGHT, 0);
+    delay(1000);
+    set_motor_speed(MOTOR_LEFT, -200);
+    set_motor_speed(MOTOR_RIGHT, -200);
+    delay(2000);
+    ultrasonic_F();
+    ultrasonic_R1();
+    ultrasonic_R2();
+    //break;
+  }
+
+  //Right lane keeping, go straight
+  while (Xe_F > 50 && 30 < Xe_R1 <= 40)
+  {
+    set_motor_speed(MOTOR_LEFT, 0);
+    set_motor_speed(MOTOR_RIGHT, 0);
+    delay(1000);
+    set_motor_speed(MOTOR_LEFT, 200);
+    set_motor_speed(MOTOR_RIGHT, -200);
+    delay(2000);
+    ultrasonic_F();
+    ultrasonic_R1();
+    ultrasonic_R2();
+    //break;
+  }
+
+
+  //LEFT TURN
+  //  set_motor_speed(MOTOR_LEFT, -200);
+  //  set_motor_speed(MOTOR_RIGHT, -200);
+  //  Serial.println("+++++");
+  //  delay(5000);
+
+  //RIGHT TURN
+  //  set_motor_speed(MOTOR_LEFT, 200);
+  //  set_motor_speed(MOTOR_RIGHT, 200);
+  //  Serial.println("+++++");
+  //  delay(5000);
+
+  //FORWARD
+  //  set_motor_speed(MOTOR_LEFT, 150);
+  //  set_motor_speed(MOTOR_RIGHT, -150);
+  //  Serial.println("+++++");
+  //  delay(5000);
+}
+
+void ultrasonic_F()  {
+  digitalWrite(TrigPin_F, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TrigPin_F, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TrigPin_F, LOW);
+  duration_F = pulseIn(EchoPin_F, HIGH);
+  cm_F = duration_F / 29 / 2;
+  Pc_F = P_F + varProcess_F;
+  G_F = Pc_F / (Pc_F + var_F);  // kalman gain
+  P_F = (1 - G_F) * Pc_F;
+  Xp_F = Xe_F;
+  Zp_F = Xp_F;
+  Xe_F = G_F * (cm_F - Zp_F) + Xp_F; // the kalman estimate
+}
+
+void ultrasonic_R1()  {
+  digitalWrite(TrigPin_R1, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TrigPin_R1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TrigPin_R1, LOW);
+  duration_R1 = pulseIn(EchoPin_R1, HIGH);
+  cm_R1 = duration_R1 / 29 / 2;
+  Pc_R1 = P_R1 + varProcess_R1;
+  G_R1 = Pc_R1 / (Pc_R1 + var_R1);  // kalman gain
+  P_R1 = (1 - G_R1) * Pc_R1;
+  Xp_R1 = Xe_R1;
+  Zp_R1 = Xp_R1;
+  Xe_R1 = G_R1 * (cm_R1 - Zp_R1) + Xp_R1; // the kalman estimate
+}
+
+void ultrasonic_R2()  {
+  digitalWrite(TrigPin_R2, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TrigPin_R2, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TrigPin_R2, LOW);
+  duration_R2 = pulseIn(EchoPin_R2, HIGH);
+  cm_R2 = duration_R2 / 29 / 2;
+  Pc_R2 = P_R2 + varProcess_R2;
+  G_R2 = Pc_R2 / (Pc_R2 + var_R2);  // kalman gain
+  P_R2 = (1 - G_R2) * Pc_R2;
+  Xp_R2 = Xe_R2;
+  Zp_R2 = Xp_R2;
+  Xe_R2 = G_R2 * (cm_R2 - Zp_R2) + Xp_R2; // the kalman estimate
+  //Serial.println(Xe_R);
+}
