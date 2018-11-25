@@ -1,0 +1,23 @@
+ //FORWARD
+  set_motor_speed(MOTOR_LEFT, -200); //clockwise
+  set_motor_speed(MOTOR_RIGHT, -200); //clockwise
+  Serial.println("FORWARD");
+  delay(3000);
+
+  //LEFT
+  set_motor_speed(MOTOR_LEFT, 150); //
+  set_motor_speed(MOTOR_RIGHT, -200); //clockwise
+  Serial.println("Left");
+  delay(3000);
+
+  //RIGHT
+  set_motor_speed(MOTOR_LEFT, -200); //
+  set_motor_speed(MOTOR_RIGHT, 150); //clockwise
+  Serial.println("RIGHT");
+  delay(3000);
+
+   //REVERSE
+   set_motor_speed(MOTOR_LEFT, 220); //clockwise
+   set_motor_speed(MOTOR_RIGHT, 80); //clockwise
+   Serial.println("REVERSE");
+   delay(3000);
