@@ -1,0 +1,140 @@
+#define ML_IN1 2   // For Motor 1 direction
+#define ML_IN2 4   // For Motor 1 direction
+#define ML_EN 3    // For Motor 1 speed 
+#define MR_IN3 7   // For Motor 2 direction
+#define MR_IN4 8   // For Motor 2 direction
+#define MR_EN 6    // For Motor 2 speed
+
+#define MOTOR_LEFT 1
+#define MOTOR_RIGHT 2
+// Set a limit for velocity and omega
+#define OMEGA_LIMIT 20
+#define VEL_LIMIT 235
+
+// Control frequency
+#define CONTROL_FREQ 20
+
+void set_motor_speed(int motor, int speed) {
+
+  int vel_cmd = constrain(abs(speed), 0, 255);
+  if (motor == MOTOR_LEFT) {
+    if (speed > 0) {
+      // Turn the motor in one direction
+      digitalWrite(ML_IN1, LOW);
+      digitalWrite(ML_IN2, HIGH);
+      analogWrite(ML_EN, vel_cmd);
+      Serial.println("vel_left > 0");
+    }
+    else if (speed < 0) {
+      // Turn the motor in another direction
+      digitalWrite(ML_IN1, HIGH);
+      digitalWrite(ML_IN2, LOW);
+      analogWrite(ML_EN, vel_cmd);
+      Serial.println("vel_left < 0");
+    }
+    else
+    {
+      // Stop the motor
+      digitalWrite(ML_IN1, LOW);
+      digitalWrite(ML_IN2, LOW);
+      analogWrite(ML_EN, 0);
+      Serial.println("vel_left = 0");
+
+    }
+  }
+  else if (motor == MOTOR_RIGHT) {
+    if (speed > 0) {
+      // Turn the motor in one direction
+      digitalWrite(MR_IN3, HIGH);
+      digitalWrite(MR_IN4, LOW);
+      analogWrite(MR_EN, vel_cmd);
+      Serial.println("vel_right > 0");
+    }
+    else if (speed < 0) {
+      // Turn the motor in another direction
+      digitalWrite(MR_IN3, LOW);
+      digitalWrite(MR_IN4, HIGH);
+      analogWrite(MR_EN,  vel_cmd);
+      Serial.println("vel_right < 0");
+    }
+    else
+    {
+      // Stop the motor
+      digitalWrite(MR_IN3, LOW);
+      digitalWrite(MR_IN4, LOW);
+      analogWrite(MR_EN, 0);
+      Serial.println("vel_right = 0");
+
+    }
+  }
+}
+
+void set_boat_move(int vel, int omega) {
+  // This function is called to set the
+  // linear and angular velocity of the
+  // boat. You can find the nutural position
+  // of your boat by tuning the v and omega.
+
+  // Linear and anglular velocity
+  int v = constrain(vel, -VEL_LIMIT, VEL_LIMIT);
+  int w = constrain(omega, -OMEGA_LIMIT, OMEGA_LIMIT);
+  // Motor velocity command for both motors
+  int vel_L = constrain(v + w, -255, 255);
+  int vel_R = constrain(v - w, -255, 255);
+  // Set speed for both motors
+  set_motor_speed(MOTOR_LEFT, vel_L);
+  set_motor_speed(MOTOR_RIGHT, vel_R);
+
+}
+
+//=========================================================
+// Arduino Setup
+void setup() {
+
+  // Setup serial port
+  Serial.begin(9600);
+
+  // Init Pins
+  // Set pin for motor drive
+  pinMode(ML_IN1, OUTPUT);
+  pinMode(ML_IN2, OUTPUT);
+  pinMode(ML_EN, OUTPUT);
+  pinMode(MR_IN3, OUTPUT);
+  pinMode(MR_IN4, OUTPUT);
+  pinMode(MR_EN, OUTPUT);
+
+  // Set both motor speed as zero
+  set_motor_speed(MOTOR_LEFT, 0);
+  set_motor_speed(MOTOR_RIGHT, 0);
+
+  // Wait for 7 second, let the system become stable
+  delay(5000);
+
+}
+
+void loop() {
+  //REVERSE
+  set_motor_speed(MOTOR_LEFT, 220); //anticlockwise to go reverse
+  set_motor_speed(MOTOR_RIGHT, 80); //anticlockwise to go reverse (less to counter turn)
+  Serial.println("REVERSE");
+  delay(3000);
+
+  //  //RIGHT
+  //  set_motor_speed(MOTOR_LEFT, -200); //more clockwise (so turns while moving ahead)
+  //  set_motor_speed(MOTOR_RIGHT, 150); //slightly anticlockwise so it doesnt move back
+  //  Serial.println("RIGHT");
+  //  delay(3000);
+
+  //  //LEFT
+  //  set_motor_speed(MOTOR_LEFT, 150); //slightly anticlockwise so it doesnt move back
+  //  set_motor_speed(MOTOR_RIGHT, -200); //more clockwise (so turns while moving ahead)
+  //  Serial.println("Left");
+  //  delay(3000);
+
+  //  //FORWARD
+  //  set_motor_speed(MOTOR_LEFT, -200); //clockwise to go front
+  //  set_motor_speed(MOTOR_RIGHT, -200); //clockwise to go front
+  //  Serial.println("Left");
+  //  delay(3000);
+
+}
