@@ -1,23 +1,23 @@
- //FORWARD
-  set_motor_speed(MOTOR_LEFT, -200); //clockwise
-  set_motor_speed(MOTOR_RIGHT, -200); //clockwise
-  Serial.println("FORWARD");
+  //REVERSE
+  set_motor_speed(MOTOR_LEFT, 220); //anticlockwise to go reverse
+  set_motor_speed(MOTOR_RIGHT, 80); //anticlockwise to go reverse (less to counter turn)
+  Serial.println("REVERSE");
   delay(3000);
 
-  //LEFT
-  set_motor_speed(MOTOR_LEFT, 150); //
-  set_motor_speed(MOTOR_RIGHT, -200); //clockwise
-  Serial.println("Left");
-  delay(3000);
+  //  //RIGHT
+  //  set_motor_speed(MOTOR_LEFT, -200); //more clockwise (so turns while moving ahead)
+  //  set_motor_speed(MOTOR_RIGHT, 150); //slightly anticlockwise so it doesnt move back
+  //  Serial.println("RIGHT");
+  //  delay(3000);
 
-  //RIGHT
-  set_motor_speed(MOTOR_LEFT, -200); //
-  set_motor_speed(MOTOR_RIGHT, 150); //clockwise
-  Serial.println("RIGHT");
-  delay(3000);
+  //  //LEFT
+  //  set_motor_speed(MOTOR_LEFT, 150); //slightly anticlockwise so it doesnt move back
+  //  set_motor_speed(MOTOR_RIGHT, -200); //more clockwise (so turns while moving ahead)
+  //  Serial.println("Left");
+  //  delay(3000);
 
-   //REVERSE
-   set_motor_speed(MOTOR_LEFT, 220); //clockwise
-   set_motor_speed(MOTOR_RIGHT, 80); //clockwise
-   Serial.println("REVERSE");
-   delay(3000);
+  //  //FORWARD
+  //  set_motor_speed(MOTOR_LEFT, -200); //clockwise to go front
+  //  set_motor_speed(MOTOR_RIGHT, -200); //clockwise to go front
+  //  Serial.println("Left");
+  //  delay(3000);
