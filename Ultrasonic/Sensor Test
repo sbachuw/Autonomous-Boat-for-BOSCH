@@ -1,0 +1,84 @@
+const int PingPin_F = 9; // Trigger Pin of Ultrasonic Sensor
+const int echoPin_F = 5; // Echo Pin of Ultrasonic Sensor
+//const int PingPin_L = 11; // Trigger pin of second ultra sonic sensor
+//const int echoPin_L = 10;
+//const int PingPin_R = 9; // Trigger pin of second ultra sonic sensor
+//const int echoPin_R = 8;
+
+void setup() {
+  Serial.begin(9600); // Starting Serial Terminal
+  Serial.println("Begin Test");
+}
+
+void loop() {
+  ultrasonic_F();
+  delay(100);
+//  ultrasonic_L();
+//  delay(1000);
+//  ultrasonic_R();
+//  delay(1000);
+}
+
+void ultrasonic_F()  {
+  long duration_F, inches_F, cm_F;
+  pinMode(PingPin_F, OUTPUT);
+  digitalWrite(PingPin_F, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PingPin_F, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(PingPin_F, LOW);
+  pinMode(echoPin_F, INPUT);
+  duration_F = pulseIn(echoPin_F, HIGH);
+  inches_F = duration_F / 74 / 2;
+  cm_F = duration_F / 29 / 2;
+  //Serial.println("Ultrasonic_F:");
+  //Serial.print(inches_F);
+  //Serial.print("in, ");
+  Serial.print(cm_F);
+  //Serial.print("cm");
+  Serial.println();
+  //return cm_F;
+}
+
+
+//void ultrasonic_L()  {
+//  long duration_L, inches_L, cm_L;
+//  pinMode(PingPin_L, OUTPUT);
+//  digitalWrite(PingPin_L, LOW);
+//  delayMicroseconds(2);
+//  digitalWrite(PingPin_L, HIGH);
+//  delayMicroseconds(10);
+//  digitalWrite(PingPin_L, LOW);
+//  pinMode(echoPin_L, INPUT);
+//  duration_L = pulseIn(echoPin_L, HIGH);
+//  inches_L = duration_L / 74 / 2;
+//  cm_L = duration_L / 29 / 2;
+//  Serial.println("ultrasonic_L:");
+//  Serial.print(inches_L);
+//  Serial.print("in, ");
+//  Serial.print(cm_L);
+//  Serial.print("cm");
+//  Serial.println();
+//  return cm_L;
+//}
+//
+//void ultrasonic_R()  {
+//  long duration_R, inches_R, cm_R;
+//  pinMode(PingPin_R, OUTPUT);
+//  digitalWrite(PingPin_R, LOW);
+//  delayMicroseconds(2);
+//  digitalWrite(PingPin_R, HIGH);
+//  delayMicroseconds(10);
+//  digitalWrite(PingPin_R, LOW);
+//  pinMode(echoPin_R, INPUT);
+//  duration_R = pulseIn(echoPin_R, HIGH);
+//  inches_R = duration_R / 74 / 2;
+//  cm_R = duration_R / 29 / 2;
+//  Serial.println("ultrasonic_R:");
+//  Serial.print(inches_R);
+//  Serial.print("in, ");
+//  Serial.print(cm_R);
+//  Serial.print("cm");
+//  Serial.println();
+//  return cm_R;
+//}
