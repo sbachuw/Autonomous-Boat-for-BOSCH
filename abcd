@@ -1,0 +1,27 @@
+void PID_F() //PID function
+{
+  Fk1 = Fkp + Fki + Fkd;
+  Fk2 = -Fkp - 2 * Fkd;
+  Fk3 = Fkd;
+  Fe2 = Fe1;
+  Fe1 = Fe;
+  Fe = (Xe_F - 33)*10; // Compute current control error by reading ESC
+  Fu = (Fu + (Fk1 * Fe) + (Fk2 * Fe1) + (Fk3 * Fe2)); //Implement u as control input
+  //Serial.print("Front:");
+  Serial.println(Fu);
+}
+
+void PID_R() //PID function
+{
+  Rk1 = Rkp + Rki + Rkd;
+  Rk2 = -Rkp - 2 * Rkd;
+  Rk3 = Rkd;
+  Re2 = Re1;
+  Re1 = Re;
+  Re = (Xe_R1 - 23)*10; // Compute current control error by reading ESC
+  Ru = Ru + Rk1 * Re + Rk2 * Re1 + Rk3 * Re2; //Implement u as control input
+  //Serial.print("Right:");
+  //Serial.println(Ru);
+}
+
+  
