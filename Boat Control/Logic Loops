@@ -170,13 +170,17 @@ void setup() {
 
 void loop() {
 
+HERE:
+//  set_motor_speed(MOTOR_LEFT, 0);
+//  set_motor_speed(MOTOR_RIGHT, 0);
+//  delay(50);
+
   //Too far from boundary, turn right
-  HERE:
   while (Xe_F > 40 && Xe_R1 > 40)
   {
     //PID_R();
-    set_motor_speed(MOTOR_LEFT, -200);
-    set_motor_speed(MOTOR_RIGHT, 150);
+    set_motor_speed(MOTOR_LEFT, -230);
+    set_motor_speed(MOTOR_RIGHT, 180);
     delay(100);
     ultrasonic_F();
     ultrasonic_R1();
@@ -192,8 +196,8 @@ void loop() {
   while (Xe_F > 40 && Xe_R1 > 20 && Xe_R1 <= 40)
   {
     //PID_R();
-    set_motor_speed(MOTOR_LEFT, -150);
-    set_motor_speed(MOTOR_RIGHT, -150);
+    set_motor_speed(MOTOR_LEFT, -200);
+    set_motor_speed(MOTOR_RIGHT, -200);
     delay(100);
     ultrasonic_F();
     ultrasonic_R1();
@@ -241,8 +245,8 @@ void loop() {
   //Front too close, back up
   while (Xe_F <= 20)
   {
-    set_motor_speed(MOTOR_LEFT, 220);
-    set_motor_speed(MOTOR_RIGHT, 80);
+    set_motor_speed(MOTOR_LEFT, 230);
+    set_motor_speed(MOTOR_RIGHT, 150);
     delay(100);
     ultrasonic_F();
     ultrasonic_R1();
