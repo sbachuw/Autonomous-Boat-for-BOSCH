@@ -127,7 +127,7 @@ void set_motor_speed(int motor, int speed) {
 void set_boat_move(int vel, int omega) {
   // This function is called to set the
   // linear and angular velocity of the
-  // boat. You can find the nutural position
+  // boat. You can find the natural position
   // of your boat by tuning the v and omega.
 
   // Linear and anglular velocity
