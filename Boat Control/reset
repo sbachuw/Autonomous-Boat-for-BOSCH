@@ -16,14 +16,15 @@ const int EchoPin_F = 12; // Echo Pin of Ultrasonic Sensor
 const int TrigPin_R1 = 11; // Trigger pin of second ultra sonic sensor
 const int EchoPin_R1 = 10;
 const int TrigPin_R2 = 9; // Trigger pin of second ultra sonic sensor
-//const int EchoPin_R2 = 5;
-int resetPin = 5;
+const int EchoPin_R2 = 5;
+//int resetPin = 5;
 
 int speed1;
 int speed2;
 
 float Fe = 0, Fe1 = 0, Fe2 = 0;
-float Fkp = 1, Fki = 0, Fkd = 0; // Define PID parameters through tuning
+float Fkp = 1, Fki = 0, Fkd = 0
+; // Define PID parameters through tuning
 float Fk1 = Fkp + Fki + Fkd;
 float Fk2 = -Fkp - 2 * Fkd;
 float Fk3 = Fkd;
@@ -145,12 +146,8 @@ void set_boat_move(int vel, int omega) {
 
 void setup() {
   // Setup serial port
-  digitalWrite(resetPin, HIGH);
-  delay(200);
-  pinMode(resetPin, OUTPUT);
-  Serial.println("reset");
   Serial.begin(9600);
-  delay(200);
+  //delay(200);
 
   pinMode(ML_IN1, OUTPUT);
   pinMode(ML_IN2, OUTPUT);
@@ -164,7 +161,7 @@ void setup() {
   pinMode(TrigPin_R1, OUTPUT);
   pinMode(EchoPin_R1, INPUT);
   pinMode(TrigPin_R2, OUTPUT);
-//  pinMode(EchoPin_R2, INPUT);
+  pinMode(EchoPin_R2, INPUT);
 
   // Set both motor speed as zero
   set_motor_speed(MOTOR_LEFT, 0);
@@ -182,7 +179,6 @@ void (* resetFunc)(void) = 0;
 void loop() {
 
 HERE:
-  resetFunc();
 
   //Too far from boundary, turn right
   while (Xe_F > 50 && Xe_R1 > 40)
@@ -191,21 +187,22 @@ HERE:
     ultrasonic_R1();
     PID_R();
     PID_F();
-    speed1 = (Ru) / 5;
-    speed2 = -(Ru * 1.2) / 5;
+    speed1 = (Ru) / 8;
+    speed2 = -(Ru * 1.4) / 5;
     set_motor_speed(MOTOR_LEFT, speed1);
     set_motor_speed(MOTOR_RIGHT, speed2);
+    delay(20);
     Serial.print("Boat turning right coz far from boundary : ");
     Serial.print(speed1);
     Serial.print(", ");
     Serial.println(speed2);
-    digitalWrite(resetPin, LOW);
+    resetFunc();  //call reset
     goto HERE;
     break;
   }
 
   //Boat levelled, go forward
-  while (Xe_F > 50 && 20 < Xe_R1 && Xe_R1 <= 40)
+  while (Xe_F > 50 && 30 < Xe_R1 && Xe_R1 <= 50)
   {
     ultrasonic_F();
     ultrasonic_R1();
@@ -215,71 +212,75 @@ HERE:
     speed2 = ((2.1 * Fu) / 13.5);
     set_motor_speed(MOTOR_LEFT, speed1);
     set_motor_speed(MOTOR_RIGHT, speed2);
+    delay(50);
     Serial.print("Boat going forward : ");
     Serial.print(speed1);
     Serial.print(", ");
     Serial.println(speed2);
-    digitalWrite(resetPin, LOW);
+    resetFunc();  //call reset
     goto HERE;
     break;
   }
 
   //Front block, turn left
-  while (20 < Xe_F <= 50)
+  while (30 < Xe_F <= 50)
   {
     ultrasonic_F();
     ultrasonic_R1();
     PID_R();
     PID_F();
-    speed1 = ( -0.7 * Fu);
-    speed2 = ( 1 * Fu);
+    speed1 = ( 0.84 * Fu);
+    speed2 = ( -1.2 * Fu);
     set_motor_speed(MOTOR_LEFT, speed1);
     set_motor_speed(MOTOR_RIGHT, speed2);
+    delay(70);
     Serial.print("Boat turning left coz front block : ");
     Serial.print(speed1);
     Serial.print(", ");
     Serial.println(speed2);
-    digitalWrite(resetPin, LOW);
+    resetFunc();  //call reset
     goto HERE;
     break;
   }
-
+  
   //Front almost touching, turn left HARDER
-  while (Xe_F <= 20)
+  while (Xe_F <= 30)
   {
     ultrasonic_F();
     ultrasonic_R1();
     PID_R();
     PID_F();
-    speed1 = Fu * 25;
-    speed2 = Fu * 25;
+    speed1 = ( 25 * Fu);
+    speed2 = ( 25 * Fu);
     set_motor_speed(MOTOR_LEFT, speed1);
     set_motor_speed(MOTOR_RIGHT, speed2);
+    delay(50);
     Serial.print("Boat turning extreme left coz front block : ");
     Serial.print(speed1);
     Serial.print(", ");
     Serial.println(speed2);
-    digitalWrite(resetPin, LOW);
+    resetFunc();  //call reset
     goto HERE;
     break;
   }
 
   //Right boundary close, go left
-  while (Xe_R1 <= 20)
+  while (Xe_R1 <= 30)
   {
     ultrasonic_F();
     ultrasonic_R1();
     PID_R();
     PID_F();
-    speed1 = -Fu;
-    speed2 = Fu;
+    speed1 = Fu;
+    speed2 = -Fu;
     set_motor_speed(MOTOR_LEFT, speed1);
     set_motor_speed(MOTOR_RIGHT, speed2);
+    delay(50);
     Serial.print("Boat turning left coz close to boundary: ");
     Serial.print(speed1);
     Serial.print(", ");
     Serial.println(speed2);
-    digitalWrite(resetPin, LOW);
+    resetFunc();  //call reset
     goto HERE;
     break;
   }
